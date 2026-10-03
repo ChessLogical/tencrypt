@@ -1,0 +1,74 @@
+[package]
+name = "tencrypt"
+version = "1.0.1"
+edition = "2024"
+rust-version = "1.99"
+description = "Ten authenticated encryption suites with atomic single-file replacement"
+license = "MIT"
+publish = false
+autobins = false
+
+[features]
+default = []
+linux-bin = []
+windows-bin = []
+
+[[bin]]
+name = "tencrypt-linux"
+path = "src/bin/tencrypt-linux.rs"
+required-features = ["linux-bin"]
+
+[[bin]]
+name = "tencrypt-windows"
+path = "src/bin/tencrypt-windows.rs"
+required-features = ["windows-bin"]
+
+[dependencies]
+anyhow = "1.0.104"
+aead = "0.5.2"
+aes = { version = "0.8.4", features = ["zeroize"] }
+aes-gcm = { version = "0.10.3", features = ["zeroize"] }
+aes-gcm-siv = "0.11.1"
+aes-siv = "0.7.0"
+chacha20poly1305 = "0.10.1"
+eax = "0.5.0"
+serpent = { version = "0.5.1", features = ["zeroize"] }
+threefish = { version = "0.5.2", features = ["zeroize"] }
+twofish = { version = "0.7.1", features = ["zeroize"] }
+camellia = { version = "0.1.0", features = ["zeroize"] }
+cipher = { version = "0.4.4", features = ["zeroize"] }
+getrandom = { version = "0.3.4", features = ["std"] }
+hkdf = "0.12.4"
+hmac = "0.12.1"
+sha2 = "0.10.9"
+zeroize = { version = "1.8.2", features = ["derive"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2.177"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.61.2", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Security_Authorization",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_System_SystemServices",
+    "Win32_System_Threading",
+    "Win32_System_WindowsProgramming",
+] }
+
+[dev-dependencies]
+tempfile = "3.23.0"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+undocumented_unsafe_blocks = "deny"
