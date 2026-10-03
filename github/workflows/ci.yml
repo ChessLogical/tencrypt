@@ -1,0 +1,55 @@
+name: Native Linux and Windows checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: ${{ matrix.platform }} / Rust 1.99.0
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            runner: ubuntu-latest
+            feature: linux-bin
+            target: x86_64-unknown-linux-gnu
+            artifact: tencrypt-linux
+            path: dist/linux/tencrypt-linux
+          - platform: windows
+            runner: windows-latest
+            feature: windows-bin
+            target: x86_64-pc-windows-msvc
+            artifact: tencrypt-windows
+            path: dist/windows/tencrypt-windows.exe
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Install Rust 1.99.0
+        run: rustup toolchain install 1.99.0 --profile minimal --component rustfmt
+      - name: Install target
+        run: rustup target add --toolchain 1.99.0 ${{ matrix.target }}
+      - name: Check formatting
+        run: cargo +1.99.0 fmt --all -- --check
+      - name: Run native unit and integration tests
+        run: cargo +1.99.0 test --locked --no-default-features --features ${{ matrix.feature }} --all-targets
+      - name: Build Linux release
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: bash scripts/build-linux.sh --target '${{ matrix.target }}'
+      - name: Build Windows release
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: .\scripts\build-windows.ps1 -Target '${{ matrix.target }}'
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.path }}
+          if-no-files-found: error
