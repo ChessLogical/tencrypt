@@ -1,5 +1,13 @@
 # Tencrypt
 
+
+This has hard coded keys. If you want external keys see https://github.com/ChessLogical/fenc
+
+
+
+
+
+
 **Version 1.0.1** corrects a Windows atomic rename failure reported as Win32
 error 87. It preserves the original embedded keys and encrypted file format.
 See [CHANGELOG.md](CHANGELOG.md) for the correction and
