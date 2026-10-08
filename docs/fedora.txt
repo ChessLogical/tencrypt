@@ -1,0 +1,1 @@
+cargo run --bin tencrypt-linux --features linux-bin
